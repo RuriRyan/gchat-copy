@@ -215,7 +215,7 @@ function main() {
 
                             var messageIndex, name;
                             [...elRef.parentElement.children].forEach((messageEl, index) => {
-                                if (messageEl ===  elRef) {
+                                if (messageEl === elRef) {
                                     messageIndex = index;
                                 }
                             });

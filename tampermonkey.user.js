@@ -1,14 +1,15 @@
 // ==UserScript==
-// @name         Google Chat thread links & quote reply
-// @version      0.0.1
-// @description  Adds button to copy links to threads on Google Chat and adds button to messages to quote reply
-// @author       upman
-// @include      https://chat.google.com/*
-// @grant        none
-// @run-at       document-idle
+// @name        Google Chat thread links & quote reply
+// @version     0.0.1
+// @description Adds button to copy links to threads on Google Chat and adds button to messages to quote reply
+// @author      RuriRyan
+// @include     https://chat.google.com/*
+// @include     https://mail.google.com/chat/*
+// @grant       none
+// @run-at		document-end
 // ==/UserScript==
 
-; (function () {
+(function () {
     function addStyle() {
         var styleElement = document.createElement('style', { type: 'text/css'});
         styleElement.appendChild(document.createTextNode(`
@@ -29,20 +30,20 @@
                 align-items: center;
                 cursor: pointer;
             }
-    
+
             .gchat-xtra-copy:hover {
                 border-color: transparent;
                 box-shadow: 0 1px 2px 0 rgba(60,64,67,0.30), 0 1px 3px 1px rgba(60,64,67,0.15);
             }
-    
+
             .gchat-xtra-copy:active {
                 background-color: rgba(26,115,232,0.122)
             }
-    
+
             .gchat-xtra-copy[data-tooltip] {
                 position: relative;
             }
-    
+
             /* Base styles for the entire tooltip */
             .gchat-xtra-copy[data-tooltip]:before,
             .gchat-xtra-copy[data-tooltip]:after {
@@ -56,7 +57,7 @@
                 transform:         translate3d(0, 0, 0);
                 pointer-events: none;
             }
-    
+
             /* Show the entire tooltip on hover and focus */
             .gchat-xtra-copy[data-tooltip]:hover:before,
             .gchat-xtra-copy[data-tooltip]:hover:after,
@@ -65,7 +66,7 @@
                 visibility: visible;
                 opacity: 1;
             }
-    
+
             /* Base styles for the tooltip's directional arrow */
             .gchat-xtra-copy[data-tooltip]:before {
                 z-index: 1001;
@@ -73,7 +74,7 @@
                 background: transparent;
                 content: "";
             }
-    
+
             /* Base styles for the tooltip's content area */
             .gchat-xtra-copy[data-tooltip]:after {
                 z-index: 1000;
@@ -85,28 +86,28 @@
                 font-size: 14px;
                 line-height: 1.2;
             }
-    
+
             /* Directions */
-    
+
             /* Top (default) */
             .gchat-xtra-copy[data-tooltip]:before,
             .gchat-xtra-copy[data-tooltip]:after {
                 bottom: 100%;
                 left: 50%;
             }
-    
+
             .gchat-xtra-copy[data-tooltip]:before {
                 margin-left: -6px;
                 margin-bottom: -12px;
                 border-top-color: #000;
                 border-top-color: hsla(0, 0%, 20%, 0.9);
             }
-    
+
             /* Horizontally align top/bottom tooltips */
             .gchat-xtra-copy[data-tooltip]:after {
                 margin-left: -30px;
             }
-    
+
             .gchat-xtra-copy[data-tooltip]:hover:before,
             .gchat-xtra-copy[data-tooltip]:hover:after,
             .gchat-xtra-copy[data-tooltip]:focus:before,
@@ -115,17 +116,17 @@
                 -moz-transform:    translateY(-12px);
                 transform:         translateY(-12px);
             }
-    
+
             /* Removes GitHub Enterprise and Google sign-in previews since they always show up empty */
             a[aria-label="Build software better, together, Web Page."],
             a[aria-label$="Google Accounts, Web Page."] {
                 display: none;
             }
         `));
-    
+
         document.head.appendChild(styleElement);
     }
-    
+
     function inIframe () {
         try {
             return window.self !== window.top;
@@ -133,7 +134,7 @@
             return true;
         }
     }
-    
+
     function main() {
         var scrollContainer = document.querySelector('c-wiz[data-group-id][data-is-client-side] > div:nth-child(1)');
         var copyButtonInsertedCount = 0;
@@ -165,13 +166,13 @@
                             el.select();
                             document.execCommand('copy');
                             document.body.removeChild(el);
-    
+
                             copyButton.setAttribute('data-tooltip', 'Copied');
                             setTimeout(function() {
                                 copyButton.removeAttribute('data-tooltip');
                             }, 1000);
                         });
-    
+
                         var buttonContainer = e.querySelector('div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)');
                         if (
                             buttonContainer &&
@@ -180,7 +181,7 @@
                             buttonContainer.children[1].tagName === 'SPAN'
                         ) {
                             buttonContainer.style = 'display: inline-block;';
-    
+
                             buttonContainer.parentElement.style = 'display: inline-block; width: unset; opacity: 1;';
                             buttonContainer.parentElement.parentElement.appendChild(copyButton);
                             copyButtonInsertedCount += 1;
@@ -188,7 +189,7 @@
                             buttonContainer.parentElement.parentElement.parentElement.parentElement.style = 'padding-top: 56px;';
                         }
                     }
-    
+
                     // Iterating on each message in the thread
                     e.querySelectorAll('div[jscontroller="VXdfxd"]').forEach(
                         // Adding quote message buttons
@@ -214,7 +215,7 @@
                             } else {
                                 return;
                             }
-    
+
                             var elRef = addreactionButton;
                             // Find parent container of the message
                             // These messages are then grouped together when they are from the recipient
@@ -223,14 +224,14 @@
                                 elRef = elRef.parentElement;
                             }
                             if (elRef.className.includes('nF6pT')) {
-    
+
                                 var messageIndex, name;
                                 [...elRef.parentElement.children].forEach((messageEl, index) => {
                                     if (messageEl ===  elRef) {
                                         messageIndex = index;
                                     }
                                 });
-    
+
                                 addreactionButton.parentElement.parentElement.appendChild(container);
                                 container.addEventListener('click', () => {
                                     while (messageIndex >= 0) {
@@ -243,17 +244,17 @@
                                         }
                                         messageIndex -= 1;
                                     }
-    
+
                                     var messageContainer = addreactionButton.parentElement.parentElement.parentElement.parentElement.children[0];
                                     var quoteText = getQuoteText(messageContainer);
-    
+
                                     let inputEl = e.querySelector('div[contenteditable="true"]'); // This fetches the input element in channels
                                     let dmInput = document.body.querySelectorAll('div[contenteditable="true"]'); // This fetches the input in DMs
                                     inputEl = inputEl ? inputEl : dmInput[dmInput.length - 1];
                                     if (!inputEl) {
                                         return;
                                     }
-    
+
                                     inputEl.innerHTML = makeInputText(name, quoteText, inputEl, messageContainer);
                                     inputEl.scrollIntoView();
                                     inputEl.click();
@@ -264,12 +265,12 @@
                     );
                 }
             );
-    
+
         if (copyButtonInsertedCount > 1) {
             scrollContainer.scrollTop += 36;
         }
     }
-    
+
     function makeInputText(name, quoteText, inputEl, messageContainer) {
         var isDM = window.location.href.includes('/dm/');
         var selection = window.getSelection().toString();
@@ -283,23 +284,23 @@
                 oneLineQuote += '... ';
             }
             oneLineQuote += selection.trim();
-    
+
             if (matches[2]) {
                 // Has text after the match
                 oneLineQuote += ' ...';
             }
         }
-    
+
         if(isDM) {
             return oneLineQuote ? '`' + oneLineQuote + '`\n' :
                 ("```\n" + quoteText + "\n```\n" + inputEl.innerHTML)
         } else {
-    
+
             return oneLineQuote ? '`' + name + ': ' + oneLineQuote + '`\n' :
                 ("```\n" + name + ":\n" + quoteText + "\n```\n" + inputEl.innerHTML);
         }
     }
-    
+
     function getQuoteText(messageContainer) {
         var regularText = getText(messageContainer);
         var videoCall = messageContainer.querySelector('a[href*="https://meet.google.com/"]');
@@ -308,10 +309,10 @@
             (videoCall ? "🎥: " + videoCall.href: null) ||
             (image ? "📷: " + image.alt: null) ||
             '...';
-    
+
         return truncateQuoteText(text);
     }
-    
+
     function truncateQuoteText(text) {
         let splitText = text.split('\n');
         let quoteText = splitText.slice(0,3).join('\n') + (splitText.length > 3 ? '\n...' : '');
@@ -320,7 +321,7 @@
         }
         return quoteText;
     }
-    
+
     function getText(messageContainer) {
         const multilineMarkdownClass = 'FMTudf';
         let textContent = '';
@@ -339,10 +340,10 @@
                 textContent += childNodes[i].innerHTML;
             }
         }
-    
+
         return textContent;
     }
-    
+
     function placeCaretAtEnd(el) {
         el.focus();
         if (typeof window.getSelection != "undefined"
@@ -362,7 +363,7 @@
             textRange.select();
         }
     }
-    
+
     function debounce(fn, delay) {
         var timeout = null;
         return function() {
@@ -376,7 +377,7 @@
             }
         }
     }
-    
+
     addStyle();
     main();
     var el = document.documentElement;
